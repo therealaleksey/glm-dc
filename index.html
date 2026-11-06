@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Lower Caves — a 90s dungeon crawler demo</title>
+<style>
+  :root { --gold: #d8b856; --parch: #2a2118; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
+  body { font-family: "Courier New", monospace; color: var(--gold); user-select: none; }
+  #c { position: fixed; inset: 0; width: 100vw; height: 100vh; image-rendering: pixelated; image-rendering: crisp-edges; }
+  #vignette { position: fixed; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%); }
+  #hurt { position: fixed; inset: 0; pointer-events: none; background: rgba(160,10,10,0.35); opacity: 0; transition: opacity .12s; }
+
+  #hud { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; gap: 8px;
+    padding: 6px; pointer-events: none; }
+  .panel { background: var(--parch); border: 2px solid #5a4a2a; padding: 6px 10px; font-size: 14px;
+    box-shadow: 0 0 0 2px #000; }
+  #hpwrap { width: 180px; }
+  #hpbar { height: 12px; background: #401010; border: 1px solid #000; margin-top: 4px; }
+  #hpfill { height: 100%; width: 100%; background: linear-gradient(#c33, #801010); }
+  #compass { min-width: 46px; text-align: center; font-size: 18px; }
+  #keyslot { opacity: .25; }
+  #keyslot.have { opacity: 1; text-shadow: 0 0 6px #ffcc44; }
+
+  #msgs { position: fixed; left: 12px; bottom: 64px; width: 340px; pointer-events: none; }
+  .msg { background: rgba(10,8,4,.72); border-left: 3px solid var(--gold); padding: 3px 8px; margin-top: 4px;
+    font-size: 14px; transition: opacity 1s; }
+
+  #minimap { position: fixed; top: 10px; right: 10px; border: 2px solid #5a4a2a; background: #0a0804;
+    image-rendering: pixelated; }
+
+  #overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.82); z-index: 10; }
+  #overlay.hidden { display: none; }
+  #box { max-width: 560px; text-align: center; padding: 28px 34px; background: var(--parch);
+    border: 3px double #8a7a4a; box-shadow: 0 0 40px #000; }
+  #box h1 { margin: 0 0 4px; font-size: 26px; letter-spacing: 2px; color: #ffd867; text-shadow: 2px 2px 0 #000; }
+  #box h2 { margin: 0 0 14px; font-size: 13px; font-weight: normal; color: #a89868; letter-spacing: 3px; }
+  #box p { font-size: 14px; line-height: 1.55; color: #d8c8a0; }
+  #box .keys { margin: 14px 0; font-size: 13px; color: #b8a878; line-height: 1.7; }
+  #box .go { margin-top: 16px; font-size: 16px; color: #ffd867; animation: blink 1.2s infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+  #crosshair { position: fixed; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px;
+    background: rgba(255,220,140,.8); pointer-events: none; }
+</style>
+<script type="importmap">
+  { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="vignette"></div>
+  <div id="hurt"></div>
+  <div id="crosshair" style="display:none"></div>
+
+  <div id="hud" style="display:none">
+    <div class="panel" id="hpwrap">HP <span id="hptext">100</span><div id="hpbar"><div id="hpfill"></div></div></div>
+    <div class="panel" id="compass">N</div>
+    <div class="panel"><span id="keyslot">&#128273; key</span></div>
+    <div class="panel" id="clock">00:00</div>
+  </div>
+
+  <div id="msgs"></div>
+  <canvas id="minimap" width="126" height="126" style="display:none"></canvas>
+
+  <div id="overlay">
+    <div id="box">
+      <h1>THE LOWER CAVES</h1>
+      <h2>A 90S DUNGEON CRAWLER &middot; TECH DEMO</h2>
+      <p id="story">Thou wakest in the dark beneath the castle. Somewhere below, a portal leads
+      back to the light &mdash; but the way is barred, and the dead walk these halls.</p>
+      <div class="keys">
+        WASD &mdash; move &nbsp;&middot;&nbsp; MOUSE &mdash; look &nbsp;&middot;&nbsp; SHIFT &mdash; run<br>
+        CLICK &mdash; swing sword &nbsp;&middot;&nbsp; E &mdash; use / open<br>
+        Find the <b>key</b>, unlock the <b>door</b>, reach the <b>portal</b>.
+      </div>
+      <p class="go" id="goline">CLICK TO ENTER THE DUNGEON</p>
+    </div>
+  </div>
+
+  <script type="module" src="game.js"></script>
+</body>
+</html>
