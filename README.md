@@ -6,13 +6,25 @@ engine choice, retro rendering, grid-based level, combat, items, progression.
 
 ## Run it
 
+The game is a static site (in `game/`) served by a Mistral App FastAPI module.
+
+Locally, either serve the static files directly:
+
 ```bash
-cd underworld-demo
+cd game
 python3 -m http.server 8000 --bind 127.0.0.1
 # open http://localhost:8000
 ```
 
-(Any static file server works. Opening `index.html` via file:// also works in
+…or run the app module exactly as it deploys:
+
+```bash
+uv sync --all-packages --frozen
+uv run --no-sync uvicorn api.main:app --host 127.0.0.1 --port 8000
+# open http://localhost:8000  (game at /, health API at /api/health/live)
+```
+
+(Any static file server works. Opening `game/index.html` via file:// also works in
 most browsers, but a server is the reliable path for ES modules.)
 
 No build step, no dependencies — [Three.js](https://threejs.org) is loaded from a
@@ -64,8 +76,21 @@ the natural sources are **Kenney** (kenney.nl, all CC0 — e.g. "Tiny Dungeon",
 chamber, torch-lit corridors, a guard room, a key room, a treasure room, and a
 locked final chamber with the escape portal.
 
-## Verification
+## Deploy as a Mistral App
 
+The repo is a Mistral App (`apps.json`): one FastAPI module (`apps/api`) that
+serves the game statically at `/` and keeps its health routes under `/api`.
+
+```bash
+mistral login
+mistral deploy
+```
+
+The CLI builds the pushed commit, deploys it to the `production` environment,
+and prints the app URL. After it works, publish it to the Vibe apps catalog from
+Studio (or `mistral apps publish`).
+
+## Verification
 ```bash
 node validate-map.mjs   # checks row widths, BFS reachability of key/door/portal/enemies
 node smoke.test.mjs    # headless Chromium playthrough (needs: npx playwright install chromium)

@@ -3,8 +3,10 @@
 import { chromium } from "playwright";
 import { spawn } from "child_process";
 
-const server = spawn("python3", ["-m", "http.server", "8127", "--bind", "127.0.0.1"], { cwd: new URL(".", import.meta.url).pathname }); server.stderr.on("data", (d) => process.stdout.write("srv: " + d)); server.on("exit", (c, s) => console.log("SERVER EXITED", c, s));
-await new Promise((r) => setTimeout(r, 800));
+const server = process.env.SMOKE_BASE_URL ? null : spawn("python3", ["-m", "http.server", "8127", "--bind", "127.0.0.1"], { cwd: new URL("./game", import.meta.url).pathname });
+if (server) { server.stderr.on("data", (d) => process.stdout.write("srv: " + d)); server.on("exit", (c, s) => console.log("SERVER EXITED", c, s)); }
+await new Promise((r) => setTimeout(r, server ? 800 : 0));
+const BASE = process.env.SMOKE_BASE_URL || "http://127.0.0.1:8127";
 
 const errors = [];
 const browser = await chromium.launch({ args: ["--enable-unsafe-swiftshader"] });
@@ -15,7 +17,8 @@ page.on("console", (m) => { if (m.type() === "error") errors.push("console: " + 
 const fail = (m) => { console.error("FAIL:", m); process.exitCode = 1; };
 const ok = (m) => console.log("ok -", m);
 
-await page.goto("http://127.0.0.1:8127/index.html");
+await page.goto(BASE + "/index.html");
+await page.goto(BASE + "/");
 await page.waitForTimeout(1200);
 if (errors.length) { errors.forEach(fail); }
 else ok("loads without JS errors");
@@ -95,5 +98,5 @@ else fail("win screen not shown: " + wonText);
 await page.screenshot({ path: ".vibe/smoke-win.png" });
 if (errors.length) errors.forEach(fail);
 await browser.close();
-server.kill();
+if (server) server.kill();
 console.log(process.exitCode ? "SMOKE TEST FAILED" : "SMOKE TEST PASSED");

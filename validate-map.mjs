@@ -1,4 +1,4 @@
-import { MAP, W, H, charAt } from "./map.js";
+import { MAP, W, H, charAt } from "./game/map.js";
 
 let ok = true;
 const fail = (msg) => { ok = false; console.error("FAIL:", msg); };
